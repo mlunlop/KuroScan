@@ -1,22 +1,14 @@
-export interface ScannedDocument {
+export interface ScannedPage {
   id: string;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-  pages: string[];
-  fileSize: string;
-  favorite: boolean;
-  tags: string[];
-  ocrText: string;
-  ocrConfidence?: number;
-  filterApplied?: 'original' | 'enhanced' | 'bw' | 'grayscale';
+  uri: string;
+  rotation?: number; // 0, 90, 180, 270
 }
 
-export interface AppSettings {
-  defaultPdfQuality: 'high' | 'balanced' | 'compressed';
-  defaultOcrLanguage: 'es' | 'en' | 'fr' | 'de' | 'it';
-  autoCropEnabled: boolean;
-  autoOrientEnabled: boolean;
-  hapticsEnabled: boolean;
-  cloudSync: boolean; // Always false for KuroScan (100% on-device guarantee)
+export interface KuroDocument {
+  id: string;
+  title: string;
+  createdAt: number;
+  pages: ScannedPage[];
+  pdfUri?: string;
+  ocrText?: string;
 }

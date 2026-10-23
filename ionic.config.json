@@ -1,7 +1,0 @@
-{
-  "name": "kuroscan-temp",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "react-vite"
-}
