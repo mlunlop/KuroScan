@@ -5,7 +5,6 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonButton,
   IonIcon,
   IonSpinner,
   IonToast,
@@ -17,15 +16,17 @@ import {
   documentTextOutline,
   trashOutline,
   shareOutline,
-  sparklesOutline,
   ellipsisVerticalOutline,
   timeOutline,
+  sparklesOutline,
 } from 'ionicons/icons';
 import { useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
 import { KuroDocument } from '../types/document';
 import { DocumentService } from '../services/documentService';
+import Aurora from '../components/Aurora/Aurora';
+import GlassSurface from '../components/GlassSurface/GlassSurface';
 
 export const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -35,7 +36,6 @@ export const HomeScreen: React.FC = () => {
   const [selectedDoc, setSelectedDoc] = useState<KuroDocument | null>(null);
   const [showActionSheet, setShowActionSheet] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
-  const [scanMode, setScanMode] = useState<'mlkit' | 'direct'>('mlkit');
 
   const loadDocuments = async () => {
     const list = await DocumentService.getDocuments();
@@ -48,17 +48,16 @@ export const HomeScreen: React.FC = () => {
 
   const showToast = (msg: string) => setToastMessage(msg);
 
-  // Trigger scanning flow: Scans with Google ML Kit -> Enters Document Editor with cropped pages!
+  // Trigger scanning flow: Launches Google ML Kit Document Scanner
   const handleStartScanning = async () => {
     setIsCapturing(true);
     try {
-      const pages = await DocumentService.scanPages(scanMode);
+      const pages = await DocumentService.scanPages('mlkit');
       if (pages.length > 0) {
-        // Navigate immediately to editor with all scanned & cropped pages!
         navigate('/editor/new', {
           state: {
             initialPages: pages,
-            mode: scanMode,
+            mode: 'mlkit',
           },
         });
       }
@@ -98,13 +97,12 @@ export const HomeScreen: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader translucent>
+      <IonHeader translucent className="ion-no-border">
         <IonToolbar
           style={
             {
-              '--background': '#000000',
+              '--background': 'transparent',
               '--color': '#ffffff',
-              '--border-color': 'rgba(255,255,255,0.08)',
             } as React.CSSProperties
           }
         >
@@ -113,19 +111,21 @@ export const HomeScreen: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '0 8px',
+              padding: '6px 16px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Opal / Graphite Brand Identity */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div
                 style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '7px',
+                  width: '30px',
+                  height: '30px',
+                  borderRadius: '9px',
                   backgroundColor: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  boxShadow: '0 0 16px rgba(255, 255, 255, 0.25)',
                 }}
               >
                 <div
@@ -137,33 +137,33 @@ export const HomeScreen: React.FC = () => {
                   }}
                 />
               </div>
-              <IonTitle style={{ padding: 0, fontSize: '1.25rem', fontWeight: '700' }}>
+              <IonTitle
+                style={{
+                  padding: 0,
+                  fontSize: '1.3rem',
+                  fontWeight: '700',
+                  letterSpacing: '-0.03em',
+                  color: '#ffffff',
+                }}
+              >
                 KuroScan
               </IonTitle>
             </div>
 
-            {/* Mode Toggle Button: Direct (Zero-Screen) vs ML Kit */}
+            {/* Monochromatic Status Pill */}
             <div
-              onClick={() => {
-                const nextMode = scanMode === 'direct' ? 'mlkit' : 'direct';
-                setScanMode(nextMode);
-                showToast(
-                  nextMode === 'direct'
-                    ? 'Modo Directo activado (Sin pantallas intermedias)'
-                    : 'Modo Google ML Kit activado'
-                );
-              }}
               style={{
-                backgroundColor: '#161618',
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
                 border: '1px solid rgba(255, 255, 255, 0.12)',
+                backdropFilter: 'blur(12px)',
                 borderRadius: '16px',
                 padding: '4px 10px',
-                fontSize: '0.72rem',
-                color: scanMode === 'direct' ? '#30d158' : '#64d2ff',
-                cursor: 'pointer',
+                fontSize: '0.75rem',
+                color: '#d4d4d8',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '6px',
+                fontWeight: '500',
               }}
             >
               <div
@@ -171,10 +171,11 @@ export const HomeScreen: React.FC = () => {
                   width: '6px',
                   height: '6px',
                   borderRadius: '50%',
-                  backgroundColor: scanMode === 'direct' ? '#30d158' : '#64d2ff',
+                  backgroundColor: '#ffffff',
+                  boxShadow: '0 0 8px #ffffff',
                 }}
               />
-              {scanMode === 'direct' ? 'Disparo Directo' : 'Google ML Kit'}
+              Google ML Kit
             </div>
           </div>
         </IonToolbar>
@@ -184,27 +185,77 @@ export const HomeScreen: React.FC = () => {
         fullscreen
         style={{ '--background': '#000000', color: '#ffffff' } as React.CSSProperties}
       >
-        <div style={{ padding: '16px 16px 100px', maxWidth: '640px', margin: '0 auto' }}>
-          {/* Header Subtitle */}
-          <div style={{ marginBottom: '16px' }}>
+        {/* Monochromatic Ambient Aurora Background (Opal/Graphite Style) */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '380px',
+            overflow: 'hidden',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        >
+          <Aurora
+            colorStops={['#1c1c20', '#2a2a32', '#3e3e48', '#1c1c20']}
+            amplitude={0.8}
+            blend={0.65}
+            speed={0.45}
+            glow={0.5}
+            height={0.55}
+          />
+
+          {/* Smooth Fade Gradient to pure OLED black */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.7) 70%, #000000 100%)',
+            }}
+          />
+        </div>
+
+        {/* Foreground Content */}
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            padding: '16px 18px 120px',
+            maxWidth: '640px',
+            margin: '0 auto',
+          }}
+        >
+          {/* Header Title Section */}
+          <div style={{ marginTop: '8px', marginBottom: '22px' }}>
             <h1
               style={{
-                margin: '8px 0 2px',
-                fontSize: '1.5rem',
+                margin: '0 0 4px',
+                fontSize: '1.65rem',
                 fontWeight: '700',
-                letterSpacing: '-0.02em',
+                letterSpacing: '-0.035em',
+                color: '#ffffff',
               }}
             >
               Documentos
             </h1>
-            <p style={{ margin: 0, color: '#8e8e93', fontSize: '0.85rem' }}>
-              {documents.length} {documents.length === 1 ? 'documento' : 'documentos'} guardados
+            <p
+              style={{
+                margin: 0,
+                color: '#a1a1aa',
+                fontSize: '0.85rem',
+                fontWeight: '400',
+              }}
+            >
+              {documents.length} {documents.length === 1 ? 'documento' : 'documentos'} escaneados
             </p>
           </div>
 
           {/* Document List */}
           {documents.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {documents.map((doc) => {
                 const firstPage = doc.pages[0];
                 return (
@@ -212,27 +263,31 @@ export const HomeScreen: React.FC = () => {
                     key={doc.id}
                     onClick={() => navigate(`/editor/${doc.id}`)}
                     style={{
-                      backgroundColor: '#111113',
-                      border: '1px solid rgba(255, 255, 255, 0.08)',
-                      borderRadius: '16px',
-                      padding: '12px',
+                      backgroundColor: 'rgba(12, 12, 14, 0.75)',
+                      backdropFilter: 'blur(20px)',
+                      WebkitBackdropFilter: 'blur(20px)',
+                      border: '1px solid rgba(255, 255, 255, 0.09)',
+                      borderRadius: '18px',
+                      padding: '12px 14px',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '14px',
                       cursor: 'pointer',
-                      transition: 'transform 0.15s ease',
+                      transition: 'transform 0.15s ease, border-color 0.15s ease',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
                     }}
                   >
                     {/* Thumbnail */}
                     <div
                       style={{
-                        width: '54px',
-                        height: '72px',
-                        borderRadius: '10px',
+                        width: '56px',
+                        height: '74px',
+                        borderRadius: '11px',
                         overflow: 'hidden',
-                        backgroundColor: '#1c1c1e',
+                        backgroundColor: '#18181b',
                         border: '1px solid rgba(255, 255, 255, 0.12)',
                         flexShrink: 0,
+                        position: 'relative',
                       }}
                     >
                       {firstPage ? (
@@ -260,7 +315,7 @@ export const HomeScreen: React.FC = () => {
                             justifyContent: 'center',
                           }}
                         >
-                          <IonIcon icon={documentTextOutline} style={{ color: '#52525b' }} />
+                          <IonIcon icon={documentTextOutline} style={{ color: '#71717a' }} />
                         </div>
                       )}
                     </div>
@@ -269,10 +324,11 @@ export const HomeScreen: React.FC = () => {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <h3
                         style={{
-                          margin: '0 0 4px',
-                          fontSize: '1rem',
+                          margin: '0 0 5px',
+                          fontSize: '1.02rem',
                           fontWeight: '600',
                           color: '#ffffff',
+                          letterSpacing: '-0.02em',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -285,11 +341,11 @@ export const HomeScreen: React.FC = () => {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '8px',
-                          color: '#8e8e93',
+                          color: '#a1a1aa',
                           fontSize: '0.78rem',
                         }}
                       >
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <IonIcon icon={timeOutline} style={{ fontSize: '0.85rem' }} />
                           {new Date(doc.createdAt).toLocaleDateString('es-ES', {
                             day: 'numeric',
@@ -303,13 +359,24 @@ export const HomeScreen: React.FC = () => {
                         {doc.ocrText && (
                           <>
                             <span>•</span>
-                            <span style={{ color: '#64d2ff', fontWeight: '500' }}>OCR</span>
+                            <span
+                              style={{
+                                color: '#ffffff',
+                                fontWeight: '600',
+                                backgroundColor: 'rgba(255,255,255,0.1)',
+                                padding: '1px 6px',
+                                borderRadius: '4px',
+                                fontSize: '0.7rem',
+                              }}
+                            >
+                              OCR
+                            </span>
                           </>
                         )}
                       </div>
                     </div>
 
-                    {/* Actions button */}
+                    {/* Action Sheet Trigger Button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -319,94 +386,111 @@ export const HomeScreen: React.FC = () => {
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: '#8e8e93',
+                        color: '#a1a1aa',
                         padding: '8px',
                         cursor: 'pointer',
                         borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
                     >
-                      <IonIcon icon={ellipsisVerticalOutline} style={{ fontSize: '1.2rem' }} />
+                      <IonIcon icon={ellipsisVerticalOutline} style={{ fontSize: '1.25rem' }} />
                     </button>
                   </div>
                 );
               })}
             </div>
           ) : (
-            /* Empty State */
+            /* Opal-style Minimalist Empty State */
             <div
               style={{
-                marginTop: '40px',
+                marginTop: '36px',
                 textAlign: 'center',
-                padding: '40px 20px',
-                backgroundColor: '#0a0a0c',
-                borderRadius: '20px',
-                border: '1px dashed rgba(255, 255, 255, 0.1)',
+                padding: '48px 24px',
+                backgroundColor: 'rgba(12, 12, 14, 0.6)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                borderRadius: '24px',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                boxShadow: '0 12px 36px rgba(0, 0, 0, 0.5)',
               }}
             >
               <div
                 style={{
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '16px',
-                  backgroundColor: '#161618',
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '20px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  margin: '0 auto 16px',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  margin: '0 auto 18px',
                 }}
               >
                 <IonIcon
                   icon={cameraOutline}
-                  style={{ fontSize: '1.8rem', color: '#a1a1aa' }}
+                  style={{ fontSize: '2rem', color: '#ffffff' }}
                 />
               </div>
 
-              <h2 style={{ fontSize: '1.15rem', fontWeight: '600', margin: '0 0 6px' }}>
+              <h2
+                style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '700',
+                  margin: '0 0 8px',
+                  letterSpacing: '-0.025em',
+                  color: '#ffffff',
+                }}
+              >
                 Sin documentos aún
               </h2>
               <p
                 style={{
-                  margin: '0 auto 20px',
-                  color: '#8e8e93',
-                  fontSize: '0.85rem',
+                  margin: '0 auto 24px',
+                  color: '#a1a1aa',
+                  fontSize: '0.88rem',
                   maxWidth: '280px',
-                  lineHeight: '1.4',
+                  lineHeight: '1.45',
                 }}
               >
-                Digitaliza tus hojas, apuntes o recibos de forma instantánea sin pantallas intermedias.
+                Escanea folios, recibos o apuntes con la máxima calidad y detección inteligente de bordes.
               </p>
 
-              <IonButton
-                onClick={handleStartScanning}
-                disabled={isCapturing}
-                style={
-                  {
-                    '--background': '#ffffff',
-                    '--color': '#000000',
-                    '--border-radius': '12px',
-                    fontWeight: '600',
-                  } as React.CSSProperties
-                }
-              >
-                {isCapturing ? (
-                  <IonSpinner name="dots" />
-                ) : (
-                  <>
-                    <IonIcon slot="start" icon={cameraOutline} />
-                    Escanear primer documento
-                  </>
-                )}
-              </IonButton>
+              <div style={{ display: 'inline-block' }}>
+                <GlassSurface
+                  width={240}
+                  height={54}
+                  borderRadius={27}
+                  backgroundOpacity={0.12}
+                  distortionScale={-160}
+                  onClick={handleStartScanning}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      color: '#ffffff',
+                      fontWeight: '600',
+                      fontSize: '0.92rem',
+                    }}
+                  >
+                    <IonIcon icon={cameraOutline} style={{ fontSize: '1.2rem' }} />
+                    Primer Escaneo
+                  </div>
+                </GlassSurface>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Bottom Floating Apple-style Pill Action Bar */}
+        {/* Bottom Floating Pill with Liquid Glass Surface */}
         <div
           style={{
             position: 'fixed',
-            bottom: '24px',
+            bottom: '26px',
             left: 0,
             right: 0,
             display: 'flex',
@@ -415,35 +499,39 @@ export const HomeScreen: React.FC = () => {
             pointerEvents: 'none',
           }}
         >
-          <button
-            onClick={handleStartScanning}
-            disabled={isCapturing}
-            style={{
-              pointerEvents: 'auto',
-              backgroundColor: '#ffffff',
-              color: '#000000',
-              border: 'none',
-              borderRadius: '26px',
-              padding: '14px 28px',
-              fontSize: '0.95rem',
-              fontWeight: '600',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: '0 10px 25px rgba(255, 255, 255, 0.15)',
-              cursor: 'pointer',
-              transition: 'transform 0.1s ease',
-            }}
-          >
-            {isCapturing ? (
-              <IonSpinner name="crescent" style={{ color: '#000000', width: '20px', height: '20px' }} />
-            ) : (
-              <>
-                <IonIcon icon={cameraOutline} style={{ fontSize: '1.25rem' }} />
-                Escanear
-              </>
-            )}
-          </button>
+          <div style={{ pointerEvents: 'auto' }}>
+            <GlassSurface
+              width={220}
+              height={58}
+              borderRadius={29}
+              distortionScale={-180}
+              backgroundOpacity={0.16}
+              onClick={handleStartScanning}
+              style={{
+                boxShadow:
+                  '0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              {isCapturing ? (
+                <IonSpinner name="crescent" style={{ color: '#ffffff', width: '22px', height: '22px' }} />
+              ) : (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '9px',
+                    color: '#ffffff',
+                    fontWeight: '600',
+                    fontSize: '0.96rem',
+                    letterSpacing: '-0.015em',
+                  }}
+                >
+                  <IonIcon icon={cameraOutline} style={{ fontSize: '1.3rem' }} />
+                  Escanear
+                </div>
+              )}
+            </GlassSurface>
+          </div>
         </div>
 
         {/* Action Sheet for Document */}

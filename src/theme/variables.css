@@ -1,10 +1,12 @@
 :root {
+  --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+
   --ion-color-primary: #ffffff;
   --ion-color-primary-rgb: 255, 255, 255;
   --ion-color-primary-contrast: #000000;
   --ion-color-primary-contrast-rgb: 0, 0, 0;
-  --ion-color-primary-shade: #e0e0e0;
-  --ion-color-primary-step: #f2f2f2;
+  --ion-color-primary-shade: #d4d4d8;
+  --ion-color-primary-tint: #ffffff;
 
   --ion-background-color: #000000;
   --ion-background-color-rgb: 0, 0, 0;
@@ -13,11 +15,35 @@
   --ion-text-color-rgb: 255, 255, 255;
 
   --ion-toolbar-background: #000000;
-  --ion-item-background: #111113;
-  --ion-card-background: #111113;
+  --ion-item-background: #09090b;
+  --ion-card-background: #09090b;
+
+  --ion-border-color: rgba(255, 255, 255, 0.08);
+}
+
+* {
+  font-family: var(--ion-font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   background-color: #000000;
   color: #ffffff;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Glass & Glow utilities */
+.glow-text-subtle {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
+}
+
+.frosted-pill {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
